@@ -1,0 +1,6 @@
+[submodule "server"]
+	path = server
+	url = https://github.com/Ghornon/WSEI-2022-2023-lato-eBilety-API
+[submodule "client"]
+	path = client
+	url = https://github.com/Ghornon/WSEI-2022-2023-lato-eBilety-gui
