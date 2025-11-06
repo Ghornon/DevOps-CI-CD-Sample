@@ -14,6 +14,8 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
+              with:
+                  submodules: true
 
             - name: Set up Node.js
               uses: actions/setup-node@v6
@@ -40,7 +42,7 @@ jobs:
               with:
                   context: ./client
                   push: true
-                  tags: ghcr.io/${{ github.repository_owner }}/ebilety-client:${{ github.sha }}
+                  tags: ghcr.io/ghornon/ebilety-client:${{ github.sha }}
 
     lint-and-build-server:
         runs-on: ubuntu-latest
@@ -51,6 +53,8 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
+              with:
+                  submodules: true
 
             - name: Login to GHCR
               uses: docker/login-action@v2
@@ -59,9 +63,12 @@ jobs:
                   username: ${{ github.repository_owner }}
                   password: ${{ secrets.GH_TOKEN }}
 
+            - name: Lowercase repository owner name
+              run: echo "OWNER=${${{github.repository_owner}}@L}" >> "${GITHUB_ENV}"
+
             - name: Build image and push to GHCR
               uses: docker/build-push-action@v4
               with:
                   context: './server/eBilety API'
                   push: true
-                  tags: ghcr.io/${{ github.repository_owner }}/ebilety-server:${{ github.sha }}
+                  tags: ghcr.io/ghornon/ebilety-server:${{ github.sha }}
