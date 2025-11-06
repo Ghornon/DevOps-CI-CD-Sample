@@ -1,0 +1,67 @@
+name: Docker Image CI for ghcr.io
+on:
+    push:
+        branches: [master, dev]
+    pull_request:
+        branches: [master, dev]
+jobs:
+    lint-and-build-client:
+        runs-on: ubuntu-latest
+        permissions:
+            packages: write
+            contents: read
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: '18.6'
+
+            - name: Install dependencies
+              run: npm install
+              working-directory: ./client
+
+            - name: Lint code
+              run: npm run lint
+              working-directory: ./client
+
+            - name: Login to GHCR
+              uses: docker/login-action@v2
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.repository_owner }}
+                  password: ${{ secrets.GH_TOKEN }}
+
+            - name: Build image and push to GHCR
+              uses: docker/build-push-action@v4
+              with:
+                  context: ./client
+                  push: true
+                  tags: ghcr.io/${{ github.repository_owner }}/ebilety-client:${{ github.sha }}
+
+    lint-and-build-server:
+        runs-on: ubuntu-latest
+        permissions:
+            packages: write
+            contents: read
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Login to GHCR
+              uses: docker/login-action@v2
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.repository_owner }}
+                  password: ${{ secrets.GH_TOKEN }}
+
+            - name: Build image and push to GHCR
+              uses: docker/build-push-action@v4
+              with:
+                  context: './server/eBilety API'
+                  push: true
+                  tags: ghcr.io/${{ github.repository_owner }}/ebilety-server:${{ github.sha }}
