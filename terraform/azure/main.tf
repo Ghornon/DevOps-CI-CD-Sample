@@ -118,6 +118,9 @@ resource "azurerm_linux_virtual_machine" "ebilety-vm" {
     azurerm_network_interface.this.id,
   ]
 
+  # Cloud-init script
+  custom_data = filebase64("./cloud-init.yml")
+
   admin_ssh_key {
     username   = "adminuser"
     public_key = file("~/.ssh/id_rsa.pub")
