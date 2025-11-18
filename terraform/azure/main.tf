@@ -16,26 +16,26 @@ provider "azurerm" {
 
 # Create a resource group
 resource "azurerm_resource_group" "this" {
-  name     = "ebilety-rg"
-  location = "West Europe"
+  name     = var.project_name
+  location = var.location
 }
 
 resource "azurerm_virtual_network" "this" {
-  name                = "ebilety-vnet"
+  name                = "${var.project_name}-vnet"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
 }
 
 resource "azurerm_subnet" "internal" {
-  name                 = "internal"
+  name                 = "${var.project_name}-internal"
   resource_group_name  = azurerm_resource_group.this.name
   virtual_network_name = azurerm_virtual_network.this.name
-  address_prefixes     = ["10.0.2.0/24"]
+  address_prefixes     = var.app_subnet_address_prefixes
 }
 
-resource "azurerm_public_ip" "main" {
-  name                = "ebilety-public-ip"
+resource "azurerm_public_ip" "this" {
+  name                = "${var.project_name}-public-ip"
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
   allocation_method   = "Static"
@@ -45,51 +45,51 @@ resource "azurerm_public_ip" "main" {
   }
 }
 
-# Create Network Security Group and rule
-resource "azurerm_network_security_group" "this" {
-  name                = "ebilety-network-sg"
-  location            = azurerm_resource_group.this.location
-  resource_group_name = azurerm_resource_group.this.name
-
-  security_rule {
-    name                       = "SSH"
-    priority                   = 300
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "HTTP"
-    priority                   = 310
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "HTTPS"
-    priority                   = 320
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
+locals {
+  security_rules = {
+    ssh = {
+      name                   = "SSH"
+      priority               = 100
+      destination_port_range = 22
+    }
+    http = {
+      name                   = "HTTP"
+      priority               = 200
+      destination_port_range = 80
+    }
+    https = {
+      name                   = "HTTPS"
+      priority               = 300
+      destination_port_range = 443
+    }
   }
 }
 
+# Create Network Security Group and rules
+resource "azurerm_network_security_group" "this" {
+  name                = "${var.project_name}-network-sg"
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+}
+
+resource "azurerm_network_security_rule" "rules" {
+  for_each = local.security_rules
+
+  name                        = each.value.name
+  priority                    = each.value.priority
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = each.value.destination_port_range
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  network_security_group_name = azurerm_network_security_group.this.name
+  resource_group_name         = azurerm_resource_group.this.name
+}
+
 resource "azurerm_network_interface" "this" {
-  name                = "ebilety-vm-nic"
+  name                = "${var.project_name}-vm-nic"
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
 
@@ -97,7 +97,7 @@ resource "azurerm_network_interface" "this" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.internal.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.main.id
+    public_ip_address_id          = azurerm_public_ip.this.id
   }
 }
 
@@ -108,12 +108,12 @@ resource "azurerm_network_interface_security_group_association" "main" {
 }
 
 
-resource "azurerm_linux_virtual_machine" "ebilety-vm" {
-  name                = "ebilety-vm"
+resource "azurerm_linux_virtual_machine" "vm" {
+  name                = "${var.project_name}-vm"
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
   size                = "Standard_B1s"
-  admin_username      = "adminuser"
+  admin_username      = var.admin_username
   network_interface_ids = [
     azurerm_network_interface.this.id,
   ]
@@ -122,8 +122,8 @@ resource "azurerm_linux_virtual_machine" "ebilety-vm" {
   custom_data = filebase64("./cloud-init.yml")
 
   admin_ssh_key {
-    username   = "adminuser"
-    public_key = file("~/.ssh/id_rsa.pub")
+    username   = var.admin_username
+    public_key = file(var.ssh_file_path)
   }
 
   os_disk {
@@ -140,5 +140,5 @@ resource "azurerm_linux_virtual_machine" "ebilety-vm" {
 }
 
 output "public_ip_address" {
-  value = azurerm_public_ip.main.ip_address
+  value = azurerm_public_ip.this.ip_address
 }
