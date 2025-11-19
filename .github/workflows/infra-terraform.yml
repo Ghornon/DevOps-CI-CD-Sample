@@ -35,8 +35,9 @@ jobs:
 
       - name: Create SSH Key from GitHub Secrets
         run: |
-          echo "${{ secrets.AZURE_VM_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AZURE_VM_SSH_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa.pub
 
       - name: Terraform Init
         id: init
