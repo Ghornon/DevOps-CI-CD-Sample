@@ -10,13 +10,11 @@ on:
   workflow_dispatch:
 
   push:
-    branches:
-      - master
-
-  # to trigger workflow on PRs
+    paths:
+      - "terraform/azure/**"
   pull_request:
-    branches:
-      - master
+    paths:
+      - "terraform/azure/**"
 
 permissions:
   id-token: write
@@ -91,12 +89,3 @@ jobs:
       # Terraform Apply
       - name: Terraform Apply
         run: terraform apply -auto-approve
-
-      - name: Get Server IP
-        id: tf_output
-        run: |
-          ip=$(terraform output -raw server_ip)
-          echo "ip=$ip" >> $GITHUB_OUTPUT
-
-    outputs:
-      server_ip: ${{ steps.tf_output.outputs.ip }}

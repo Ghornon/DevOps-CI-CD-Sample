@@ -1,61 +1,65 @@
 name: Docker Image CI for ghcr.io
 on:
-    push:
-        branches: [master, dev]
-    pull_request:
-        branches: [master]
+  push:
+    paths:
+      - "client/**"
+      - "server/**"
+  pull_request:
+    paths:
+      - "client/**"
+      - "server/**"
 jobs:
-    build-client:
-        runs-on: ubuntu-latest
-        permissions:
-            packages: write
-            contents: read
+  build-client:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  submodules: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
-            - name: Login to GHCR
-              uses: docker/login-action@v2
-              with:
-                  registry: ghcr.io
-                  username: ${{ github.repository_owner }}
-                  password: ${{ secrets.GH_TOKEN }}
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_TOKEN }}
 
-            - name: Build image and push to GHCR
-              uses: docker/build-push-action@v4
-              with:
-                  context: ./client
-                  push: true
-                  tags: ghcr.io/ghornon/ebilety-client:${{ github.sha }}
+      - name: Build image and push to GHCR
+        uses: docker/build-push-action@v4
+        with:
+          context: ./client
+          push: true
+          tags: ghcr.io/ghornon/ebilety-client:${{ github.sha }}
 
-    build-server:
-        runs-on: ubuntu-latest
-        permissions:
-            packages: write
-            contents: read
+  build-server:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  submodules: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
-            - name: Login to GHCR
-              uses: docker/login-action@v2
-              with:
-                  registry: ghcr.io
-                  username: ${{ github.repository_owner }}
-                  password: ${{ secrets.GH_TOKEN }}
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_TOKEN }}
 
-            - name: Lowercase repository owner name
-              run: echo "OWNER=${${{github.repository_owner}}@L}" >> "${GITHUB_ENV}"
+      - name: Lowercase repository owner name
+        run: echo "OWNER=${${{github.repository_owner}}@L}" >> "${GITHUB_ENV}"
 
-            - name: Build image and push to GHCR
-              uses: docker/build-push-action@v4
-              with:
-                  context: './server/eBilety API'
-                  push: true
-                  tags: ghcr.io/ghornon/ebilety-server:${{ github.sha }}
+      - name: Build image and push to GHCR
+        uses: docker/build-push-action@v4
+        with:
+          context: "./server/eBilety API"
+          push: true
+          tags: ghcr.io/ghornon/ebilety-server:${{ github.sha }}
