@@ -47,45 +47,39 @@ jobs:
         run: terraform fmt -check -recursive
         continue-on-error: true
 
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -out tfplan
-        continue-on-error: false
+      - name: Terraform Init
+        run: terraform init
 
-      # Save plan to artifacts
-      - name: Publish Terraform Plan
+      - name: Terraform Plan (create tfplan)
+        id: plan
+        run: |
+          terraform plan -out=tfplan
+          if [ -f tfplan ]; then
+            echo "created=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "created=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload tfplan artifact (if created)
+        if: steps.plan.outputs.created == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: tfplan
 
-      # Create string output of Terraform Plan
-      - name: Create String Output
-        id: tf-plan-string
+      - name: Terraform Apply (use saved plan if present)
         run: |
-          TERRAFORM_PLAN=$(terraform show -no-color tfplan)
-          delimiter="$(openssl rand -hex 8)"
-          echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
-          echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
-          echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          echo '```terraform' >> $GITHUB_OUTPUT
-          echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
-          echo '```' >> $GITHUB_OUTPUT
-          echo "</details>" >> $GITHUB_OUTPUT
-          echo "${delimiter}" >> $GITHUB_OUTPUT
+          if [ -f tfplan ]; then
+            terraform apply -auto-approve tfplan
+          else
+            terraform apply -auto-approve
+          fi
 
-      # Publish Terraform Plan as task summary
-      - name: Publish Terraform Plan to Task Summary
-        env:
-          SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
+      - name: Get Server IP
+        id: tf_output
         run: |
-          echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+          ip=$(terraform output -raw server_ip)
+          echo "ip=$ip" >> $GITHUB_OUTPUT
 
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      # Terraform Apply
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+    outputs:
+      server_ip: ${{ steps.tf_output.outputs.ip }}
