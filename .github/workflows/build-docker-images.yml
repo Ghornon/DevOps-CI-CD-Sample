@@ -1,5 +1,6 @@
 name: Docker Image CI for ghcr.io
 on:
+  workflow_dispatch:
   push:
     paths:
       - "client/**"
@@ -33,7 +34,7 @@ jobs:
         with:
           context: ./client
           push: true
-          tags: ghcr.io/ghornon/ebilety-client:${{ github.sha }}
+          tags: ghcr.io/ghornon/ebilety-client:latest, ghcr.io/ghornon/ebilety-client:${{ github.sha }}
 
   build-server:
     runs-on: ubuntu-latest
@@ -54,12 +55,9 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GH_TOKEN }}
 
-      - name: Lowercase repository owner name
-        run: echo "OWNER=${${{github.repository_owner}}@L}" >> "${GITHUB_ENV}"
-
       - name: Build image and push to GHCR
         uses: docker/build-push-action@v4
         with:
           context: "./server/eBilety API"
           push: true
-          tags: ghcr.io/ghornon/ebilety-server:${{ github.sha }}
+          tags: ghcr.io/ghornon/ebilety-server:latest, ghcr.io/ghornon/ebilety-server:${{ github.sha }}
