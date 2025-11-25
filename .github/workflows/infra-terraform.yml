@@ -97,7 +97,7 @@ jobs:
           USERNAME=$(terraform output -raw admin_username)
 
           # Create Ansible hosts.ini file
-          echo "[azure_vms]" > ansible_hosts.ini
+          echo "[azure_vms]" >> ansible_hosts.ini
           echo "$IP_ADDRESS ansible_user=$USERNAME" >> ansible_hosts.ini
 
           echo "::notice file=ansible_hosts.ini::Inventory file created with IP: $IP_ADDRESS"
@@ -106,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ansible-inventory
-          path: ansible_hosts.ini
+          path: ./terraform/azure/ansible_hosts.ini
 
   Ansible:
     runs-on: ubuntu-latest
@@ -138,6 +138,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ansible-inventory
+          path: ./ansible
 
       - name: Run Ansible Playbook
         run: ansible-playbook -i ansible_hosts.ini configure_docker.yml
