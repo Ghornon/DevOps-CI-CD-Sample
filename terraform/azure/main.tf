@@ -12,6 +12,7 @@ terraform {
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
   features {}
+  subscription_id = var.subscription_id
 }
 
 # Create a resource group
@@ -141,4 +142,8 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
 output "public_ip_address" {
   value = azurerm_public_ip.this.ip_address
+}
+
+output "admin_username" {
+  value = azurerm_linux_virtual_machine.vm.admin_username
 }

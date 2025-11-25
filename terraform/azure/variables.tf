@@ -27,3 +27,7 @@ variable "ssh_file_path" {
   type        = string
   default     = "~/.ssh/id_rsa.pub"
 }
+variable "subscription_id" {
+  description = "The subscription ID for the Azure account"
+  type        = string
+}

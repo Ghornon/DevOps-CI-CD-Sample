@@ -1,0 +1,46 @@
+---
+- name: Configure Docker and Deploy Applications
+  hosts: all
+  become: yes
+
+  vars:
+    gh_username: "{{ lookup('env', 'GH_USERNAME' )}}"
+    gh_token: "{{ lookup('env', 'GH_TOKEN' )}}"
+    DB_PASSWORD: "{{ lookup('env', 'DB_PASSWORD' )}}"
+
+  tasks:
+    - name: Ensure Docker is installed
+      ansible.builtin.apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker Compose is installed
+      ansible.builtin.get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: "0755"
+
+    - name: Login to GHCR
+      community.docker.docker_login:
+        username: "{{ gh_username }}"
+        password: "{{ gh_token }}"
+        registry_url: ghcr.io
+
+    - name: Copy docker-compose.yml to remote server
+      ansible.builtin.copy:
+        src: ./docker-compose.yml
+        dest: /home/{{ ansible_user }}/docker-compose.yml
+        owner: "{{ ansible_user }}"
+        mode: "0644"
+
+    - name: Create .env file on remote server
+      ansible.builtin.copy:
+        content: |
+          DB_PASSWORD={{ DB_PASSWORD }}
+        dest: /home/{{ ansible_user }}/.env
+
+    - name: Deploy Docker containers using Docker Compose
+      ansible.builtin.command:
+        cmd: docker-compose -f /home/{{ ansible_user }}/docker-compose.yml up -d
+        chdir: /home/{{ ansible_user }}
