@@ -35,6 +35,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.AZURE_VM_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
           chmod 600 ~/.ssh/id_rsa.pub
 
