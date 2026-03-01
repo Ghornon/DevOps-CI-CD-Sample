@@ -1,14 +1,13 @@
-import pg from 'pg';
+import { SQL } from 'bun';
 import config from './config';
 
-const pool = new pg.Pool(config);
+const db = new SQL({
+	adapter: 'postgres',
+	host: config.host,
+	port: config.port,
+	user: config.user,
+	password: config.password,
+	database: config.database,
+});
 
-export async function query(text: string, params?: any[]) {
-	const client = await pool.connect();
-	try {
-		const res = await client.query(text, params);
-		return res;
-	} finally {
-		client.release();
-	}
-}
+export default db;
