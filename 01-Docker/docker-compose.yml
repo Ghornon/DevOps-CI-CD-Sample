@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+    sample-server:
+        image: sample-server:production
+        build:
+            context: ../server
+            target: 'production'
+        ports:
+            - '8080:8080'
+        environment:
+            - PORT=8080
+            - DB_HOST=postgres-db
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PASSWORD=postgres
+            - DB_NAME=postgres
+        depends_on:
+            - postgres-db
+
+    postgres-db:
+        image: postgres:latest
+        # also give the postgres service an alias on the default network
+        networks:
+            default:
+                aliases:
+                    - db
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=postgres
+        ports:
+            - '5432:5432'
+
+    sample-client:
+        image: sample-client:production
+        build:
+            context: ../client
+            target: 'production'
+        ports:
+            - '3000:3000'
+        environment:
+            - VITE_SERVICE_URL=http://sample-server:8080
+        depends_on:
+            - sample-server
