@@ -47,7 +47,7 @@ fi
 
 # 5. Create Federated Credential (OIDC)
 echo "Creating Federated Identity for GitHub..."
-az ad app federation-credential create --id "$CLIENT_ID" --parameters "{
+az ad app federated-credential create --id "$CLIENT_ID" --parameters "{
   \"name\": \"github-oidc-$BRANCH\",
   \"issuer\": \"https://token.actions.githubusercontent.com\",
   \"subject\": \"repo:$REPO_FULL_NAME:ref:refs/heads/$BRANCH\",
@@ -63,7 +63,7 @@ gh secret set AZURE_SUBSCRIPTION_ID --body "$SUBSCRIPTION_ID"
 
 # 7. Push Secrets to .secrets file (optional, for local development)
 echo "Saving secrets to .secrets file..."
-cat <<EOF > .secrets
+cat <<EOF >> .secrets
 AZURE_CLIENT_ID=$CLIENT_ID
 AZURE_TENANT_ID=$TENANT_ID
 AZURE_SUBSCRIPTION_ID=$SUBSCRIPTION_ID
