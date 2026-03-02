@@ -1,47 +1,13 @@
-# Azure container instance deployment
+# Azure Container Instance deployment
 
-Source: https://learn.microsoft.com/en-us/azure/container-instances/container-instances-github-action
+This script automates the Azure OIDC (OpenID Connect) setup by synchronizing your **GitHub CLI (gh)** and **Azure CLI (az)** configurations. It dynamically retrieves your repository metadata and subscription details to establish a secure, secret-less handshake between GitHub Actions and Azure, eliminating manual copy-pasting and common "No subscriptions found" errors.
 
-## Configure GitHub workflow
+### Prerequisites
 
-### Create resource group
+- You must be logged into the **Azure CLI (az login)**.
+- You must be logged into the **GitHub CLI (gh auth login)**.
+- You must be inside the local directory of your Git repository.
 
-```powershell
-az group create --name sample-rg --location westeurope
+```bash
+bash setup-azure-oidc.sh
 ```
-
-### Create credentials for Azure authentication
-
-```PowerShell
-New-AzADServicePrincipal -DisplayName "GitHubActionsConnection"
-$ServicePrincipalName = "GitHubActionsConnection"
-$AzSubscriptionName = "Default"
-
-Connect-AzureAD
-
-$Subscription = (Get-AzSubscription -SubscriptionName $AzSubscriptionName)
-$ServicePrincipal = Get-AzADServicePrincipal -DisplayName $ServicePrincipalName
-$AzureADApplication = Get-AzureADApplication -SearchString $ServicePrincipalName
-
-$OutputObject = [PSCustomObject]@{
-clientId = $ServicePrincipal.AppId
-clientSecret = (New-AzureADApplicationPasswordCredential -ObjectId $AzureADApplication.ObjectId).Value
-subscriptionId = $Subscription.Id
-tenantId = $Subscription.TenantId
-}
-
-$OutputObject | ConvertTo-Json
-```
-
-Output is similar to:
-
-```JSON
-{
-  "clientId": "xxxx6ddc-xxxx-xxxx-xxx-ef78a99dxxxx",
-  "clientSecret": "xxxx79dc-xxxx-xxxx-xxxx-aaaaaec5xxxx",
-  "subscriptionId": "aaaa0a0a-bb1b-cc2c-dd3d-eeeeee4e4e4e",
-  "tenantId": "aaaabbbb-0000-cccc-1111-dddd2222eeee",
-}
-```
-
-Save it as github secret `AZURE_CREDENTIALS={JSON}`
