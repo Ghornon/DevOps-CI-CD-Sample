@@ -1,10 +1,17 @@
-name: Deploy to Azure Container Instance
+name: Deploy to Azure Container Apps
 on:
     workflow_dispatch:
     workflow_run:
         workflows: ['Docker build and publish to GHCR']
         types:
             - completed
+
+env:
+    AZURE_RESOURCE_GROUP: sample-rg
+    AZURE_LOCATION: west europe
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_DB: sampledb
 
 jobs:
     deploy:
@@ -27,14 +34,32 @@ jobs:
                   tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-            - name: 'Deploy to Azure Container Instances'
+            - name: 'Deploy PostgreSQL to Azure Container Instances'
               uses: 'azure/aci-deploy@v1'
               with:
-                  resource-group: 'sample-rg'
-                  dns-name-label: 'sample-${{ matrix.component }}'
-                  image: 'ghcr.io/${{github.repository_owner}}/sample-${{ matrix.component }}:latest'
-                  registry-login-server: 'ghcr.io'
+                  resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+                  dns-name-label: sample-db
+                  image: postgres:latest
+                  cpu: 1 #Optional
+                  memory: 0.1 #Optional
+                  name: sample-db
+                  location: ${{ env.AZURE_LOCATION }}
+                  ports: '5432'
+                  environment-variables: |
+                      'POSTGRES_USER=${{ env.POSTGRES_USER }},POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }},POSTGRES_DB=${{ env.POSTGRES_DB }}'
+
+            - name: 'Deploy client and server to Azure Container Instances'
+              uses: 'azure/aci-deploy@v1'
+              with:
+                  resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+                  dns-name-label: sample-${{ strategy.matrix.component }}
+                  image: ghcr.io/${{ github.repository_owner }}/sample-${{ strategy.matrix.component }}:latest
+                  cpu: 1 #Optional
+                  memory: 0.1 #Optional
                   registry-username: ${{ github.repository_owner }}
                   registry-password: ${{ secrets.GH_TOKEN }}
-                  name: 'sample-${{ matrix.component }}'
-                  location: 'west europe'
+                  name: sample-${{ strategy.matrix.component }}
+                  location: ${{ env.AZURE_LOCATION }}
+                  ports: "${{ strategy.matrix.component == 'client' && '80' || '8080' }}"
+                  environment-variables: |
+                      ${{ strategy.matrix.component == 'server' && 'PORT=8080,DB_HOST=sample-db,DB_PORT=5432,DB_USER=${{ env.POSTGRES_USER }},DB_PASSWORD=${{ env.POSTGRES_PASSWORD }},DB_NAME=${{ env.POSTGRES_DB }}' || '' }}
