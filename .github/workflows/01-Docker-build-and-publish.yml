@@ -2,6 +2,9 @@ name: Docker build and publish to GHCR
 on:
     workflow_dispatch:
     push:
+        paths:
+            - 'client/**'
+            - 'server/**'
         branches:
             - 'master'
         tags:

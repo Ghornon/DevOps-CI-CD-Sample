@@ -35,9 +35,9 @@ jobs:
               uses: 'azure/aci-deploy@v1'
               with:
                   resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-                  dns-name-label: sample-db
+                  dns-name-label: sample_db
                   image: postgres:latest
-                  name: sample-db
+                  name: sample_db
                   location: ${{ env.AZURE_LOCATION }}
                   ports: '5432'
                   environment-variables: |
@@ -47,11 +47,11 @@ jobs:
               uses: 'azure/aci-deploy@v1'
               with:
                   resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-                  dns-name-label: sample-server
+                  dns-name-label: sample_server
                   image: ghcr.io/${{ github.repository_owner }}/sample-server:latest
                   registry-username: ${{ github.repository_owner }}
                   registry-password: ${{ secrets.GH_TOKEN }}
-                  name: sample-server
+                  name: sample_server
                   location: ${{ env.AZURE_LOCATION }}
                   ports: '8080'
                   environment-variables: |
@@ -61,11 +61,11 @@ jobs:
               uses: 'azure/aci-deploy@v1'
               with:
                   resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-                  dns-name-label: sample-client
+                  dns-name-label: sample_client
                   image: ghcr.io/${{ github.repository_owner }}/sample-client:latest
                   registry-username: ${{ github.repository_owner }}
                   registry-password: ${{ secrets.GH_TOKEN }}
-                  name: sample-client
+                  name: sample_client
                   location: ${{ env.AZURE_LOCATION }}
                   ports: '80'
                   environment-variables: ''
