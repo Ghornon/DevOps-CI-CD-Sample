@@ -7,11 +7,11 @@ on:
             - completed
 
 env:
-    AZURE_RESOURCE_GROUP: sample-rg
-    AZURE_LOCATION: west europe
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_DB: sampleDB
+    AZURE_RESOURCE_GROUP: 'sample-rg'
+    AZURE_LOCATION: 'west europe'
+    POSTGRES_USER: 'postgres'
+    POSTGRES_PASSWORD: 'postgres'
+    POSTGRES_DB: 'sampleDB'
 
 jobs:
     deploy:
@@ -37,11 +37,11 @@ jobs:
                   resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
                   dns-name-label: sampledb
                   image: postgres:latest
-                  name: sampledb
+                  name: sample-db
                   location: ${{ env.AZURE_LOCATION }}
                   ports: '5432'
                   environment-variables: |
-                      'POSTGRES_USER=${{ env.POSTGRES_USER }},POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }},POSTGRES_DB=${{ env.POSTGRES_DB }}'
+                      POSTGRES_USER=${{ env.POSTGRES_USER }},POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }},POSTGRES_DB=${{ env.POSTGRES_DB }}
 
             - name: 'Deploy server to Azure Container Instances'
               uses: 'azure/aci-deploy@v1'
@@ -51,11 +51,11 @@ jobs:
                   image: ghcr.io/${{ github.repository_owner }}/sample-server:latest
                   registry-username: ${{ github.repository_owner }}
                   registry-password: ${{ secrets.GH_TOKEN }}
-                  name: sampleserver
+                  name: sample-server
                   location: ${{ env.AZURE_LOCATION }}
                   ports: '8080'
                   environment-variables: |
-                      'PORT=8080,DB_HOST=${{ env.POSTGRES_DB }},DB_PORT=5432,DB_USER=${{ env.POSTGRES_USER }},DB_PASSWORD=${{ env.POSTGRES_PASSWORD }},DB_NAME=${{ env.POSTGRES_DB }}'
+                      PORT=8080,DB_HOST=${{ env.POSTGRES_DB }},DB_PORT=5432,DB_USER=${{ env.POSTGRES_USER }},DB_PASSWORD=${{ env.POSTGRES_PASSWORD }},DB_NAME=${{ env.POSTGRES_DB }}
 
             - name: 'Deploy client to Azure Container Instances'
               uses: 'azure/aci-deploy@v1'
@@ -65,7 +65,6 @@ jobs:
                   image: ghcr.io/${{ github.repository_owner }}/sample-client:latest
                   registry-username: ${{ github.repository_owner }}
                   registry-password: ${{ secrets.GH_TOKEN }}
-                  name: sampleclient
+                  name: sample-client
                   location: ${{ env.AZURE_LOCATION }}
                   ports: '80'
-                  environment-variables: ''
