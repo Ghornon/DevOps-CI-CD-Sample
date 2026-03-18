@@ -5,10 +5,12 @@ on:
 permissions:
     id-token: write
     contents: read
+    actions: write
 
 jobs:
     Build-Terraform-Infrastructure:
         runs-on: ubuntu-latest
+
         defaults:
             run:
                 working-directory: ./03-Terraform-Azure/app
