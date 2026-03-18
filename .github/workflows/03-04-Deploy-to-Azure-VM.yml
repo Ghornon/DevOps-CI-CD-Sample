@@ -24,8 +24,10 @@ jobs:
                   tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-            - name: Terraform Init
+            - name: Terraform Init Backend
               id: init
+              env:
+                  GH_TOKEN: ${{ github.token }}
               run: ./init-backend.sh
 
             - name: Terraform Validate
