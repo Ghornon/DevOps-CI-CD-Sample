@@ -29,7 +29,7 @@ jobs:
             - name: Terraform Init Backend
               id: init
               env:
-                  GH_TOKEN: ${{ github.token }}
+                  GH_TOKEN: ${{ secrets.GH_TOKEN }}
               run: ./init-backend.sh
 
             - name: Terraform Validate
