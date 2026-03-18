@@ -108,7 +108,7 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: ansible-inventory
-                  path: ./ansible_hosts.ini
+                  path: 03-Terraform-Azure/app/ansible_hosts.ini
 
     Ansible-Provisioning:
         runs-on: ubuntu-latest
