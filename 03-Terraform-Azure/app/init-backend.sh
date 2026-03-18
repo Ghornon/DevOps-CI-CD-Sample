@@ -49,5 +49,3 @@ terraform init \
   -backend-config="storage_account_name=$STORAGE_ACCOUNT_NAME" \
   -backend-config="container_name=tfstate" \
   -backend-config="key=prod.terraform.tfstate"
-
-terraform import 

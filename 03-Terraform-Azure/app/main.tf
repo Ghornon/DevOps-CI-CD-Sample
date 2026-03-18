@@ -14,7 +14,7 @@ provider "azurerm" {
   features {}
 }
 
-# Create a resource group
+# Get existing resource group
 data "azurerm_resource_group" "this" {
   name = var.project_name
 }
