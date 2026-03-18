@@ -2,6 +2,15 @@ name: Deploy to Azure VM
 
 on:
     workflow_dispatch:
+    push:
+        paths:
+            - '03-Terraform-Azure/**'
+            - '04-Ansible-Provisioning/**'
+        branches:
+            - 'master'
+        tags:
+            - 'v*'
+
 permissions:
     id-token: write
     contents: read
@@ -99,7 +108,7 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: ansible-inventory
-                  path: ansible_hosts.ini
+                  path: ./ansible_hosts.ini
 
     Ansible-Provisioning:
         runs-on: ubuntu-latest
