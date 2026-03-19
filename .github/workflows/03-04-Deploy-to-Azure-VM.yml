@@ -133,7 +133,7 @@ jobs:
             - name: Create SSH Key from GitHub Secrets
               run: |
                   mkdir -p ~/.ssh
-                  echo "${{ secrets.AZURE_VM_SSH_KEY }}" > ~/.ssh/id_rsa
+                  echo "${{ secrets.AZURE_SSH_KEY }}" > ~/.ssh/id_rsa
                   chmod 600 ~/.ssh/id_rsa
 
             - name: Download Ansible Inventory Artifact

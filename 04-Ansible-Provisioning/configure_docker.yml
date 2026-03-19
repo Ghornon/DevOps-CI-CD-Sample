@@ -29,16 +29,10 @@
 
       - name: Copy docker-compose.yml to remote server
         ansible.builtin.copy:
-            src: ../01-Docker/docker-compose.yml
+            src: ./docker-compose.yml
             dest: /home/{{ ansible_user }}/docker-compose.yml
             owner: '{{ ansible_user }}'
             mode: '0644'
-
-      - name: Create .env file on remote server
-        ansible.builtin.copy:
-            content: |
-                DB_PASSWORD={{ DB_PASSWORD }}
-            dest: /home/{{ ansible_user }}/.env
 
       - name: Deploy Docker containers using Docker Compose
         ansible.builtin.command:

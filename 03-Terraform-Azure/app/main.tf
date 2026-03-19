@@ -61,6 +61,11 @@ locals {
       priority               = 300
       destination_port_range = 443
     }
+    API = {
+      name                   = "API"
+      priority               = 400
+      destination_port_range = 8080
+    }
   }
 }
 

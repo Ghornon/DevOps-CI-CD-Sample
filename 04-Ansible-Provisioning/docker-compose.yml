@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+    sample-server:
+        image: ghcr.io/ghornon/sample-server:latest
+        ports:
+            - '8080:8080'
+        networks:
+            - backend
+            - frontend
+        environment:
+            - PORT=8080
+            - DB_HOST=postgres-db
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PASSWORD=postgres
+            - DB_NAME=postgres
+        depends_on:
+            - postgres-db
+
+    postgres-db:
+        image: postgres
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=postgres
+        ports:
+            - '5432:5432'
+        networks:
+            - backend
+
+    sample-client:
+        image: ghcr.io/ghornon/sample-client:latest
+        ports:
+            - '80:80'
+        networks:
+            - frontend
+        links:
+            - 'sample-server:localhost'
+        depends_on:
+            - sample-server
+
+networks:
+    frontend:
+        driver: bridge
+    backend:
+        internal: true
