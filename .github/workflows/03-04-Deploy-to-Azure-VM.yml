@@ -144,3 +144,6 @@ jobs:
 
             - name: Run Ansible Playbook
               run: ansible-playbook -i ansible_hosts.ini configure_docker.yml
+              env:
+                  GH_USERNAME: ${{ github.repository_owner }}
+                  GH_TOKEN: ${{ secrets.GH_TOKEN }}
