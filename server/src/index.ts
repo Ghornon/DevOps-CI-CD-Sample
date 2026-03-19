@@ -29,7 +29,10 @@ const server = Bun.serve({
 
 		const url = new URL(req.url);
 
-		if (url.pathname === '/' && req.method === 'GET') {
+		if (
+			url.pathname === '/' ||
+			(url.pathname === '/api' && req.method === 'GET')
+		) {
 			return new Response('Hello from Bun!', {
 				status: 200,
 				headers: corsHeaders,

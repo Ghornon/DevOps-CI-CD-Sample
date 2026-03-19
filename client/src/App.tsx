@@ -11,7 +11,7 @@ function App() {
 
 	useEffect(() => {
 		// Check API status on mount
-		fetchAPI('/').then((res) => {
+		fetchAPI('/api').then((res) => {
 			if (res.ok) {
 				setApiStatus('Online');
 			} else {

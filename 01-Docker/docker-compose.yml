@@ -1,4 +1,3 @@
-version: '3.8'
 services:
     sample-server:
         image: sample-server:production
@@ -7,6 +6,9 @@ services:
             target: 'production'
         ports:
             - '8080:8080'
+        networks:
+            - frontend
+            - backend
         environment:
             - PORT=8080
             - DB_HOST=postgres-db
@@ -18,12 +20,9 @@ services:
             - postgres-db
 
     postgres-db:
-        image: postgres:latest
-        # also give the postgres service an alias on the default network
+        image: postgres
         networks:
-            default:
-                aliases:
-                    - db
+            - backend
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
@@ -38,5 +37,12 @@ services:
             target: 'production'
         ports:
             - '80:80'
+        networks:
+            - frontend
         depends_on:
             - sample-server
+
+networks:
+    frontend:
+    backend:
+        internal: true

@@ -1,8 +1,7 @@
-const APIURL: string =
-	import.meta.env.VITE_SERVICE_URL || 'http://localhost:8080';
+const base_url: string = window.location.origin;
 
 export async function fetchAPI(endpoint: string, method = 'GET') {
-	const url = new URL(endpoint, APIURL);
+	const url = new URL(endpoint, base_url);
 
 	const res = await fetch(url, { method });
 
