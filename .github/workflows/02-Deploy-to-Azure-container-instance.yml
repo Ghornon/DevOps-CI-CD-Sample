@@ -8,7 +8,7 @@ on:
 
 env:
     AZURE_RESOURCE_GROUP: 'sample-rg'
-    AZURE_LOCATION: 'west europe'
+    AZURE_LOCATION: 'westeurope'
     POSTGRES_HOST_NAME: 'sample-db-v2rga'
     POSTGRES_USER: 'postgres'
     POSTGRES_PASSWORD: 'postgres'
@@ -32,7 +32,7 @@ jobs:
                   tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                   subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-            - name: Create Resource if not exist
+            - name: Create Resource Group if not exist
               uses: azure/CLI@v2
               with:
                   inlineScript: |
