@@ -65,21 +65,21 @@ jobs:
               with:
                   resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
                   dns-name-label: sampleserver
-                  image: ghcr.io/${{ github.repository_owner }}/sample-server:latest
+                  image: ghcr.io/ghornon/sample-server:latest
                   registry-username: ${{ github.repository_owner }}
                   registry-password: ${{ secrets.GH_TOKEN }}
                   name: sample-server
                   location: ${{ env.AZURE_LOCATION }}
                   ports: '8080'
                   environment-variables: |
-                      PORT=8080,DB_HOST=${{ env.POSTGRES_HOST_NAME }},DB_PORT=5432,DB_USER=${{ env.POSTGRES_USER }},DB_PASSWORD=${{ env.POSTGRES_PASSWORD }},DB_NAME=${{ env.POSTGRES_DB }}
+                      PORT=8080,DB_HOST=${{ env.POSTGRES_HOST_NAME }}.postgres.database.azure.com,DB_PORT=5432,DB_USER=${{ env.POSTGRES_USER }},DB_PASSWORD=${{ env.POSTGRES_PASSWORD }},DB_NAME=${{ env.POSTGRES_DB }}
 
             - name: 'Deploy client to Azure Container Instances'
               uses: 'azure/aci-deploy@v1'
               with:
                   resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
                   dns-name-label: sampleclient
-                  image: ghcr.io/${{ github.repository_owner }}/sample-client:latest
+                  image: ghcr.io/ghornon/sample-client:latest
                   registry-username: ${{ github.repository_owner }}
                   registry-password: ${{ secrets.GH_TOKEN }}
                   name: sample-client
