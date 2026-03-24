@@ -45,3 +45,4 @@ jobs:
           registryUrl: ghcr.io
           registryUsername: ${{ github.repository_owner }}
           registryPassword: ${{ secrets.GH_TOKEN }}
+          location: ${{ env.AZURE_LOCATION }}
