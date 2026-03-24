@@ -41,7 +41,7 @@ jobs:
         with:
           containerAppName: sample-client
           resourceGroup: ${{ env.AZURE_RESOURCE_GROUP }}
-          imageToDeploy: ghcr.io/${{ github.repository_owner }}/sample-client:latest
+          imageToDeploy: ghcr.io/ghornon/sample-client:latest
           registryUrl: ghcr.io
           registryUsername: ${{ github.repository_owner }}
           registryPassword: ${{ secrets.GH_TOKEN }}
