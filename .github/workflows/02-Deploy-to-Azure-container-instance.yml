@@ -2,30 +2,23 @@ name: Deploy to Azure Container Apps
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Docker build and publish to GHCR"]
+    workflows: ['Docker build and publish to GHCR']
     types:
       - completed
 
 env:
-  AZURE_RESOURCE_GROUP: "sample-rg"
-  AZURE_LOCATION: "westeurope"
-  POSTGRES_HOST_NAME: "sample-db-v2rga"
-  POSTGRES_USER: "postgres"
-  POSTGRES_PASSWORD: "postgres"
-  POSTGRES_DB: "sampleDB"
+  AZURE_RESOURCE_GROUP: 'sample-rg'
+  AZURE_LOCATION: 'westeurope'
+  POSTGRES_HOST_NAME: 'sample-db-v2rga'
+  POSTGRES_USER: 'postgres'
+  POSTGRES_PASSWORD: 'postgres'
+  POSTGRES_DB: 'sampleDB'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     steps:
-      # checkout the repo
-      - name: "Checkout GitHub Action"
-        uses: actions/checkout@main
-
-      - name: "Login via Azure CLI"
+      - name: 'Login via Azure CLI'
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -40,58 +33,12 @@ jobs:
               az group create --name ${{ env.AZURE_RESOURCE_GROUP }} --location ${{ env.AZURE_LOCATION }}
             fi
 
-      - name: Create Postgres if not exist
-        uses: azure/CLI@v2
+      - name: Deploy private GHCR image to Container App
+        uses: azure/container-apps-deploy-action@v1
         with:
-          inlineScript: |
-            if ! az postgres flexible-server show --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ env.POSTGRES_HOST_NAME }} &>/dev/null; then
-              az postgres flexible-server create \
-                --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                --name ${{ env.POSTGRES_HOST_NAME }} \
-                --location ${{ env.AZURE_LOCATION }} \
-                --admin-user ${{ env.POSTGRES_USER }} \
-                --admin-password ${{ env.POSTGRES_PASSWORD }} \
-                --tier Burstable \
-                --sku-name Standard_B1ms \
-                --storage-size 32 \
-                --version 14 \
-                --public-access 0.0.0.0 \
-                --high-availability Disabled \
-                --yes
-            fi
-
-      - name: "Deploy server to Azure Container Instances"
-        uses: azure/CLI@v2
-        with:
-          inlineScript: |
-            az container create \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --name sample-server \
-            --image mcr.microsoft.com/azuredocs/aci-helloworld \ 
-            --dns-name-label aci-demo --ports 80 --os-type linux --memory 1.5 --cpu 1
-
-      - name: "Deploy server to Azure Container Instances"
-        uses: "azure/aci-deploy@v1"
-        with:
-          resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          dns-name-label: sampleserver
-          image: ghcr.io/ghornon/sample-server:latest
-          registry-username: ${{ github.repository_owner }}
-          registry-password: ${{ secrets.GH_TOKEN }}
-          name: sample-server
-          location: ${{ env.AZURE_LOCATION }}
-          ports: "8080"
-          environment-variables: |
-            PORT=8080,DB_HOST=${{ env.POSTGRES_HOST_NAME }}.postgres.database.azure.com,DB_PORT=5432,DB_USER=${{ env.POSTGRES_USER }},DB_PASSWORD=${{ env.POSTGRES_PASSWORD }},DB_NAME=${{ env.POSTGRES_DB }}
-
-      - name: "Deploy client to Azure Container Instances"
-        uses: "azure/aci-deploy@v1"
-        with:
-          resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          dns-name-label: sampleclient
-          image: ghcr.io/ghornon/sample-client:latest
-          registry-username: ${{ github.repository_owner }}
-          registry-password: ${{ secrets.GH_TOKEN }}
-          name: sample-client
-          location: ${{ env.AZURE_LOCATION }}
-          ports: "80"
+          containerAppName: sample-client
+          resourceGroup: ${{ env.AZURE_RESOURCE_GROUP }}
+          imageToDeploy: ghcr.io/${{ github.repository_owner }}/sample-client:latest
+          registryUrl: ghcr.io
+          registryUsername: ${{ github.repository_owner }}
+          registryPassword: ${{ secrets.GH_TOKEN }}
