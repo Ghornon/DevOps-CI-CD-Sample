@@ -1,53 +1,53 @@
 name: Docker build and publish to GHCR
 on:
-    workflow_dispatch:
-    push:
-        paths:
-            - 'client/**'
-            - 'server/**'
-        branches:
-            - 'master'
-        tags:
-            - 'v*'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'client/**'
+      - 'server/**'
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
 jobs:
-    build-and-publish:
-        runs-on: ubuntu-latest
-        permissions:
-            packages: write
-            contents: read
-        strategy:
-            matrix:
-                component: [client, server]
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    strategy:
+      matrix:
+        component: [client, server]
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            - name: Login to GHCR
-              uses: docker/login-action@v2
-              with:
-                  registry: ghcr.io
-                  username: ${{ github.repository_owner }}
-                  password: ${{ secrets.GH_TOKEN }}
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_TOKEN }}
 
-            - name: Docker meta
-              id: meta
-              uses: docker/metadata-action@v5
-              with:
-                  images: ghcr.io/${{ github.repository_owner }}/sample-${{ matrix.component }}
-                  tags: |
-                      type=schedule
-                      type=ref,event=branch
-                      type=ref,event=pr
-                      type=semver,pattern={{version}}
-                      type=sha
-                      type=raw,value=latest,enable={{is_default_branch}}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/sample-${{ matrix.component }}
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
 
-            - name: Build images and push to GHCR
-              uses: docker/build-push-action@v6
-              with:
-                  context: ./${{ matrix.component }}
-                  push: ${{ github.event_name != 'pull_request' }}
-                  tags: ${{ steps.meta.outputs.tags }}
-                  labels: ${{ steps.meta.outputs.labels }}
-                  target: production
+      - name: Build images and push to GHCR
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.component }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          target: production

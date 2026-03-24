@@ -1,48 +1,48 @@
 services:
-    sample-server:
-        image: sample-server:production
-        build:
-            context: ../server
-            target: 'production'
-        ports:
-            - '8080:8080'
-        networks:
-            - frontend
-            - backend
-        environment:
-            - PORT=8080
-            - DB_HOST=postgres-db
-            - DB_PORT=5432
-            - DB_USER=postgres
-            - DB_PASSWORD=postgres
-            - DB_NAME=postgres
-        depends_on:
-            - postgres-db
+  sample-server:
+    image: sample-server:production
+    build:
+      context: ../server
+      target: 'production'
+    ports:
+      - '8080:8080'
+    networks:
+      - frontend
+      - backend
+    environment:
+      - PORT=8080
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=postgres
+    depends_on:
+      - postgres-db
 
-    postgres-db:
-        image: postgres
-        networks:
-            - backend
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
-            - POSTGRES_DB=postgres
-        ports:
-            - '5432:5432'
+  postgres-db:
+    image: postgres
+    networks:
+      - backend
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - '5432:5432'
 
-    sample-client:
-        image: sample-client:production
-        build:
-            context: ../client
-            target: 'production'
-        ports:
-            - '80:80'
-        networks:
-            - frontend
-        depends_on:
-            - sample-server
+  sample-client:
+    image: sample-client:production
+    build:
+      context: ../client
+      target: 'production'
+    ports:
+      - '80:80'
+    networks:
+      - frontend
+    depends_on:
+      - sample-server
 
 networks:
-    frontend:
-    backend:
-        internal: true
+  frontend:
+  backend:
+    internal: true
